@@ -165,7 +165,9 @@ def build_patches(data, gradient=True, lbp=True, weights=None, optimize_params=F
 			numpy.random.shuffle(arr)
 			from sklearn.grid_search import GridSearchCV
 			from sklearn.metrics import mean_squared_error
-			clfg = GridSearchCV(SVR(kernel="linear"), {'C':[0.1], 'epsilon' : [0.4, 0.3, 0.2, 0.1]}, loss_func=mean_squared_error, verbose=100)
+			from sklearn.metrics import make_scorer
+			clfg = GridSearchCV(SVR(kernel="linear"), {'C':[0.1], 'epsilon' : [0.4, 0.3, 0.2, 0.1]},
+                                            scoring=make_scorer(mean_squared_error, greater_is_better=False), verbose=100)
 			clfg.fit(features[arr,:], labels[arr])
 			print clfg.best_params_
 			clf = clfg.best_estimator_
@@ -176,14 +178,15 @@ def build_patches(data, gradient=True, lbp=True, weights=None, optimize_params=F
 		clf.fit(features, labels, sample_weight=sample_weight)
 
 		# store filters as normalized images, for validation
-		#saveAsImage(clf.coef_, join(data_folder, "svmImages/", "raw"+str(r)+".bmp"))
+		saveAsImage(clf.coef_, join(data_folder, "svmImages/", "raw"+str(r)+".bmp"))
 
 		filters.append(clf.coef_.flatten().tolist())
 		raw_bias.append(clf.intercept_[0])
 
 		if gradient:
 			if optimize_params:
-				clfg = GridSearchCV(SVR(kernel="linear"), {'C':[0.1], 'epsilon' : [0.4, 0.3, 0.2, 0.1]}, loss_func=mean_squared_error, verbose=100)
+				clfg = GridSearchCV(SVR(kernel="linear"), {'C':[0.1], 'epsilon' : [0.4, 0.3, 0.2, 0.1]},
+                                                    scoring=make_scorer(mean_squared_error, greater_is_better=False), verbose=100)
 				clfg.fit(grad_features[arr,:], labels[arr])
 				print "gradient best params"+str(clfg.best_params_)
 				clf = clfg.best_estimator_
@@ -193,10 +196,11 @@ def build_patches(data, gradient=True, lbp=True, weights=None, optimize_params=F
 			grad_filters.append(clf.coef_.flatten().tolist())
 			grad_bias.append(clf.intercept_[0])
 
-			#saveAsImage(clf.coef_, join(data_folder, "svmImages/", "grad"+str(r)+".bmp"))
+			saveAsImage(clf.coef_, join(data_folder, "svmImages/", "grad"+str(r)+".bmp"))
 		if lbp:
 			if optimize_params:
-				clfg = GridSearchCV(SVR(kernel="linear"), {'C':[0.1], 'epsilon' : [0.4, 0.3, 0.2, 0.1]}, loss_func=mean_squared_error, verbose=100)
+				clfg = GridSearchCV(SVR(kernel="linear"), {'C':[0.1], 'epsilon' : [0.4, 0.3, 0.2, 0.1]},
+                                                    scoring=make_scorer(mean_squared_error, greater_is_better=False), verbose=100)
 				clfg.fit(lbp_features[arr,:], labels[arr])
 				print "lbp best params"+str(clfg.best_params_)
 				clf = clfg.best_estimator_
@@ -206,7 +210,7 @@ def build_patches(data, gradient=True, lbp=True, weights=None, optimize_params=F
 			lbp_filters.append(clf.coef_.flatten().tolist())
 			lbp_bias.append(clf.intercept_[0])
 
-			#saveAsImage(clf.coef_, join(data_folder, "svmImages/", "lbp"+str(r)+".bmp"))
+			saveAsImage(clf.coef_, join(data_folder, "svmImages/", "lbp"+str(r)+".bmp"))
 
 	# output for standard model:
 	filteroutput = {
